@@ -162,7 +162,7 @@ def main():
         o_video_file = i_video_file[0:-4] + '_src_captions.mp4'
         txt_file = i_video_file[0:-4] + '.txt'
         srt_file = i_video_file[0:-4] + '.srt'
-        add_caption(i_video_file, o_video_file=o_video_file, lang='ko', srt_file=srt_file, txt_file = txt_file)
+        add_caption(i_video_file, o_video_file=o_video_file, lang='ko', srt_file=srt_file, txt_file=txt_file)
         print(f"\n\n\n\nProcess complete! check whether {o_video_file} and {txt_file} were generated")
     elif step == 2:
         # txt file as caption

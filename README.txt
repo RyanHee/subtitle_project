@@ -4,6 +4,8 @@
 3. pip install ffmpeg-python openai-whisper
 
 
+pip install ffmpeg-python
+pip install openai-whisper
 
 运行：
 1. 双击start.bat

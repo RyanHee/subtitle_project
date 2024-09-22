@@ -15,6 +15,7 @@ def extract_audio(video_file, audio_file):
 
 
 def generate_transcript(audio_file, transcript_file):
+
     try:
         # Load the Whisper model
         model = whisper.load_model("base")  # You can use "small", "medium", "large" for more accuracy
@@ -165,7 +166,7 @@ def main():
         add_caption(i_video_file, o_video_file=o_video_file, lang='ko', srt_file=srt_file, txt_file=txt_file)
         print(f"\n\n\n\n处理完成! 确认{o_video_file}和{txt_file}是否生成了")
     elif step == 2:
-        #txt file as caption
+        # txt file as caption
         o_video_file = i_video_file[0:-4] + '_dst_captions.mp4'
         if args.txt_file is None:
             txt_file = i_video_file[0:-4] + '.txt'
@@ -178,7 +179,7 @@ def main():
         add_caption_from_srtfile(i_video_file, o_video_file=o_video_file, srt_file=txt_file)
         print(f"\n\n\n\n处理完成! 确认{o_video_file}是否生成了")
     elif step == 3:
-        #srt file as caption
+        # srt file as caption
         o_video_file = i_video_file[0:-4] + '_dst_captions.mp4'
         if args.srt_file is None:
             srt_file = i_video_file[0:-4] + '.srt'

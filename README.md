@@ -13,14 +13,14 @@ A software that helps automatically generates subtitles in videos, allows for ea
    ```bash
     pip install openai-whisper
     ```
-    You can input these commands by double clicking start.bat and typing it in there, or you can use your terminal and cd to the same directory where this is located
+    **You can input these commands by double clicking start.bat and typing it in there, or you can use your terminal and cd to the same directory where this is located**
 
 ## Run
 
 1. Double click start.bat to get it running
 2. Copy the video you want into the current directory (e.g. ling_1.mp4)
 3. Run command 1, which adds subtitles into the video, as well as outputting a transcript of the subtitles<br>   
-   An example is shown below:
+   **An example is shown below:**
     ```bash
    python run.py 1 ling_1.mp4
    ```
@@ -29,9 +29,9 @@ A software that helps automatically generates subtitles in videos, allows for ea
    * ling_1.srt (srt file of transcript)
    * ling_1.txt (txt file of transcript)<br>
 
-    It is important to note that the txt and srt files are time stamped for each subtitle, making it convenient to edit them when needed<br>
+    **It is important to note that the txt and srt files are time stamped for each subtitle, making it convenient to edit them when needed<br>**
 
-    txt and srt files would look something like this:
+    **txt and srt files would look something like this:**
 ![img.png](img.png)
 
 4. After making necessary changes to the subtitle files, you can run commands 2 or 3 to implement these changes into the actual video <br>  
@@ -55,7 +55,8 @@ A software that helps automatically generates subtitles in videos, allows for ea
     ```
    
     Command 2 and 3 serves the same purpose, but command 2 uses txt files as subtitle transcripts while command 3 uses srt files as subtitle transcripts
-<br> Overall, 2 is better for people less familiar with editing, while 3 is better for people who have a lot of experience with editing and are familiar with srt files
+<br>  
+Overall, 2 is better for people less familiar with editing, while 3 is better for people who have a lot of experience with editing and are familiar with srt files
 
 
 ## Applications of the software

@@ -7,6 +7,7 @@ A software that helps automatically generates subtitles in videos, allows for ea
 2. Install Python (version 3.7 or above).
 3. Install `ffmpeg-python`, `openai-whisper` by running the following commands:<br>
 <br>
+
    ```bash
    pip install ffmpeg-python
     ```

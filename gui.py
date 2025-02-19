@@ -4,33 +4,68 @@ import re
 import os,sys
 import run
 
-######## gui 的一些配置参数
+######## GUI configuration parameters
 
 # Font and color
 title_font = ("Helvetica", 16, "bold")  # Font: (Font name, Size, Style)
-#text_color = "blue"  # You can use color names or hex codes, e.g., "#0000FF"
 
-w_dlt = 20 # entry 之间间隔
-y_dlt = 30 # 行之间的数据
-y_sec_dlt = 60 # section之间的间隔
-#char_w = 10 # 字符的宽度
+w_dlt = 20 # spacing between entry fields
+y_dlt = 30 # spacing between rows
+y_sec_dlt = 60 # spacing between sections
 x_0 = 20
 y_0 = 20
 
-######## 构建 gui
+######## Build GUI
 win_size = [1024,720]
-win_size_str = f'{win_size[0]}x{win_size[1]}' # '800x600'
+win_size_str = f'{win_size[0]}x{win_size[1]}'
 root = tk.Tk()
 root.geometry(win_size_str)
-root.title('翻译工具 0.3.0')
+root.title('Translation Tool 0.3.0')
 
 default_font = font.nametofont("TkDefaultFont")
 
-######################### section: 视频截取
+######################### Section: Video Cutting
 
-# params: 文件视频名 t0, t1 输出文件视频名
+# params: input video file t0, t1 output video file
 
 def on_cutvideo_bt_click(args):
+    i_video_file = args[0][3].get()
+    t0 = args[2][3].get()
+    t1 = args[3][3].get()
+    o_video_file = args[1][3].get()
+
+    if i_video_file == None or i_video_file == '':
+        msg = 'Please enter the input video file name'
+        messagebox.showinfo('Notice', msg)
+        return
+
+    if t0 == None or t0=='':
+        msg = 'Please enter the start time, e.g., 00:00:00'
+        messagebox.showinfo('Notice', msg)
+        return
+
+    if t1 == None or t1=='':
+        msg = 'Please enter the end time, e.g., 00:00:00'   
+        messagebox.showinfo('Notice', msg)
+        return
+    
+    if o_video_file == None or o_video_file=='':
+        msg = 'Please enter the output file name'
+        messagebox.showinfo('Notice', msg)
+        return
+
+    rt = run.cut_video(i_video_file, t0, t1, o_video_file)
+
+    if rt == 0:
+        msg = f'Successfully cut, check output file {o_video_file}'
+        messagebox.showinfo('Notice', msg)
+    else:
+        msg = 'Cutting failed, check the start and end times\n'
+        msg += "Time format is HH:MM:SS or MM:SS\n"
+        msg += "1:12:34 means 1 hour 12 minutes 34 seconds; 12:34 means 12 minutes 34 seconds"
+        messagebox.showinfo('Notice', msg)
+
+    return
     i_video_file = args[0][3].get()
     t0 = args[2][3].get()
     t1 = args[3][3].get()
@@ -69,29 +104,28 @@ def on_cutvideo_bt_click(args):
 
     return
 
-cutvideo_boxes_0 = [ ['输入文件名:  ', 800, 'i_video_file', None] ]
-cutvideo_boxes_1 = [ ['输出文件名:  ', 800, 'o_video_file', None] ]
-cutvideo_boxes_2 = [ ['开始时间 HH:MM:SS  ', 80, 't0', None], ['结束时间 HH:MM:SS  ', 80, 't1', None] ]
+cutvideo_boxes_0 = [ ['Input File Name:  ', 800, 'i_video_file', None] ]
+cutvideo_boxes_1 = [ ['Output File Name:  ', 800, 'o_video_file', None] ]
+cutvideo_boxes_2 = [ ['Start Time HH:MM:SS  ', 80, 't0', None], ['End Time HH:MM:SS  ', 80, 't1', None] ]
 
 cutvideo_boxess = [cutvideo_boxes_0, cutvideo_boxes_1, cutvideo_boxes_2]
 cutvideo_args = cutvideo_boxes_0 + cutvideo_boxes_1 + cutvideo_boxes_2
 xstart = x_0
 ystart = y_0
 
-label = tk.Label(text="截取视频", font=title_font)
+label = tk.Label(text="Cut Video", font=title_font)
 label.place(x=xstart, y=ystart)  # Specify position
 ystart += y_dlt
 
 for cutvideo_boxes in cutvideo_boxess:
     xstart = x_0
     for i in range(len(cutvideo_boxes)):
-        #txtlen = len(general_boxes[i][0])*char_w
         txtlen = default_font.measure(cutvideo_boxes[i][0])
         label = ttk.Label(text=cutvideo_boxes[i][0], width=txtlen)
-        label.place(x=xstart, y=ystart)  # Specify position
+        label.place(x=xstart, y=ystart)
         xstart += txtlen
         cutvideo_boxes[i][3] = ttk.Entry()
-        cutvideo_boxes[i][3].place(x=xstart, y=ystart, width=cutvideo_boxes[i][1])  # Specify position
+        cutvideo_boxes[i][3].place(x=xstart, y=ystart, width=cutvideo_boxes[i][1])
         xstart += cutvideo_boxes[i][1] + w_dlt
 
     ystart += y_dlt
@@ -99,48 +133,42 @@ for cutvideo_boxes in cutvideo_boxess:
 # Button (execute)
 #ystart += y_dlt
 xstart = x_0
-bt_txt = " 截取 "
-#bt_w = (len(bt_txt)*char_w)
+bt_txt = " Cut "
 bt_w = default_font.measure(bt_txt) + 20
 cutvideo_bt = ttk.Button(text=bt_txt, command=lambda: on_cutvideo_bt_click(cutvideo_args))
 cutvideo_bt.place(x=xstart, y=ystart, width=bt_w)
 
-
-######################### section: step 1, 给原始视频文件打上原始文字字幕，并且生成字幕文件(txt)
+######################### Section: Step 1, Add Original Captions to Video and Generate Subtitle File (txt)
 
 def on_step1_bt_click(args):
     i_video_file = args[0][3].get()
 
     if i_video_file == None or i_video_file == '':
-        msg = '请输入原始视频文件名'
-        messagebox.showinfo('提示', msg)
+        msg = 'Please enter the input video file name'
+        messagebox.showinfo('Notice', msg)
         return
 
     o_video_file = i_video_file[0:-4]+'_src_captions.mp4'
     srt_file = i_video_file[0:-4]+'.txt'
     run.add_caption(i_video_file,o_video_file=o_video_file,lang='ko',srt_file=srt_file)
 
-    msg = f'处理完成! 确认{o_video_file}和{srt_file}是否生成了'
-    messagebox.showinfo('提示', msg)
+    msg = f'Processing completed! Check {o_video_file} and {srt_file}'
+    messagebox.showinfo('Notice', msg)
 
     return
 
-
-
 ystart += y_sec_dlt
-label = tk.Label(text="step 1: 给原始视频文件打上原始文字字幕，并且生成字幕文件(txt)", font=title_font)
-label.place(x=xstart, y=ystart)  # Specify position
+label = tk.Label(text="Step 1: Add Original Captions to Video and Generate Subtitle File (txt)", font=title_font)
+label.place(x=xstart, y=ystart)
 ystart += y_dlt
 
-
-step1_boxes_0 = [ ['输入文件名:  ', 800, 'i_video_file', None] ]
+step1_boxes_0 = [ ['Input File Name:  ', 800, 'i_video_file', None] ]
 step1_boxess = [step1_boxes_0]
 step1_args = step1_boxes_0
 
 for step1_boxes in step1_boxess:
     xstart = x_0
     for i in range(len(step1_boxes)):
-        #txtlen = len(general_boxes[i][0])*char_w
         txtlen = default_font.measure(step1_boxes[i][0])
         label = ttk.Label(text=step1_boxes[i][0], width=txtlen)
         label.place(x=xstart, y=ystart)  # Specify position
@@ -154,7 +182,7 @@ for step1_boxes in step1_boxess:
 # Button (execute)
 #ystart += y_dlt
 xstart = x_0
-bt_txt = " 运行 "
+bt_txt = " Run "
 #bt_w = (len(bt_txt)*char_w)
 bt_w = default_font.measure(bt_txt) + 20
 step1_bt = ttk.Button(text=bt_txt, command=lambda: on_step1_bt_click(step1_args))
@@ -162,73 +190,72 @@ step1_bt.place(x=xstart, y=ystart, width=bt_w)
 
 
 
-######################### section: step 2, 给原始视频文件添加翻译的字幕
+######################### Section: Step 2, Add Translated Subtitles to Original Video File
 
 def on_step2_bt_click(args):
     i_video_file = args[0][3].get()
     font_size = args[1][3].get()
     font_color = args[2][3].get()
 
-    if font_size is None or font_size=='':
+    if font_size is None or font_size == '':
         font_size = None
     else:
         try:
             font_size = int(font_size)
         except:
-            msg = f'请输入正确的字体大小, 例如12'
-            messagebox.showinfo('提示', msg)
+            msg = 'Please enter a valid font size, e.g., 12'
+            messagebox.showinfo('Notice', msg)
             return
 
-    if font_color is None or font_color=='':
+    if font_color is None or font_color == '':
         font_color = None
     else:
         if font_color[0:1] != '#':
-            font_color = '#'+ font_color
+            font_color = '#' + font_color
 
-		# Regular expression to match hex color codes
+        # Regular expression to match hex color codes
         hex_color_pattern = re.compile(r'^#([0-9a-fA-F]{6}|[0-9a-fA-F]{3})$')
         valid = bool(hex_color_pattern.match(font_color))
         if valid:
             print(f"font_color={font_color}")
         else:
-            #print(f"font_color is bad {font_color}")
-            #font_color=None
-            msg = f'请输入正确的颜色, 例如纯红色为FF0000'
-            messagebox.showinfo('提示', msg)
-            return 
+            msg = 'Please enter a valid color, e.g., FF0000 for red'
+            messagebox.showinfo('Notice', msg)
+            return
 
         color1 = run.convert_color_format(font_color[1:])
         font_color = '#' + color1
 
-
-    o_video_file = i_video_file[0:-4]+'_dst_captions.mp4'
-    srt_file = i_video_file[0:-4]+'.txt'
+    o_video_file = i_video_file[0:-4] + '_dst_captions.mp4'
+    srt_file = i_video_file[0:-4] + '.txt'
     if not os.path.exists(srt_file):
-        msg = f"找不到字幕文件{srt_file}; 指定正确路径"
-        messagebox.showinfo('提示', msg)
+        msg = f"Subtitle file {srt_file} not found; Please specify the correct path"
+        messagebox.showinfo('Notice', msg)
         return
-		
-    run.add_caption_from_srtfile(i_video_file,o_video_file=o_video_file,
-        srt_file=srt_file,font_size=font_size,font_color=font_color)
-    msg = f"处理完成! 确认{o_video_file}是否生成了"
-    messagebox.showinfo('提示', msg)
+
+    run.add_caption_from_srtfile(
+        i_video_file, o_video_file=o_video_file,
+        srt_file=srt_file, font_size=font_size, font_color=font_color
+    )
+    msg = f"Processing completed! Check if {o_video_file} was generated"
+    messagebox.showinfo('Notice', msg)
 
     return
 
+
 ystart += y_sec_dlt
-label = tk.Label(text="step 2: 给原始视频文件添加翻译的字幕", font=title_font)
+label = tk.Label(text="Step 2: Add Translated Subtitles to Original Video File", font=title_font)
 label.place(x=xstart, y=ystart)  # Specify position
 ystart += y_dlt
 
-step2_boxes_0 = [ ['输入文件名:  ', 800, 'i_video_file', None] ]
-step2_boxes_1 = [ ['字体大小(12-24):  ', 60, 'font_size', None], ['字体颜色(红色为FF0000):  ', 100, 'font_color', None] ]
+step2_boxes_0 = [['Input File Name:  ', 800, 'i_video_file', None]]
+step2_boxes_1 = [['Font Size (12-24):  ', 60, 'font_size', None], ['Font Color (Red is FF0000):  ', 100, 'font_color', None]]
 step2_boxess = [step2_boxes_0, step2_boxes_1]
 step2_args = step2_boxes_0 + step2_boxes_1
 
 for step2_boxes in step2_boxess:
     xstart = x_0
     for i in range(len(step2_boxes)):
-        #txtlen = len(general_boxes[i][0])*char_w
         txtlen = default_font.measure(step2_boxes[i][0])
         label = ttk.Label(text=step2_boxes[i][0], width=txtlen)
         label.place(x=xstart, y=ystart)  # Specify position
@@ -242,16 +269,75 @@ for step2_boxes in step2_boxess:
 # Button (execute)
 #ystart += y_dlt
 xstart = x_0
-bt_txt = " 运行 "
+bt_txt = " Run "
 #bt_w = (len(bt_txt)*char_w)
 bt_w = default_font.measure(bt_txt) + 20
 step2_bt = ttk.Button(text=bt_txt, command=lambda: on_step2_bt_click(step2_args))
 step2_bt.place(x=xstart, y=ystart, width=bt_w)
 
 
-######################### section: 生成交付文件
+######################### Section: Generate Delivery Files
 
 def on_genout_bt_click(args):
+    i_video_file = args[0][3].get()
+    i_srt_file = args[1][3].get()
+    out_txt_file = args[2][3].get()
+    out_ass_file = args[3][3].get()
+
+    if i_video_file == None or i_video_file == '':
+        msg = 'Please enter the input video file name'
+        messagebox.showinfo('Notice', msg)
+    
+    if i_srt_file == None or i_srt_file == '':
+        msg = 'Please enter the translated txt file name'
+        messagebox.showinfo('Notice', msg)
+
+    if out_txt_file == None or out_txt_file == '':
+        out_txt_file = None
+
+    if out_ass_file == None or out_ass_file == '':
+        out_ass_file = None
+    
+    if out_txt_file == None and out_ass_file is None:
+        msg = 'Please enter at least one output file name (txt or ass)'
+        messagebox.showinfo('Notice', msg)
+
+
+    rt = run.get_mp4_resolution(i_video_file)
+    if rt is None:
+        msg = f"Input video file {i_video_file} not found; Please specify the correct path"
+        messagebox.showinfo('Notice', msg)
+        return
+
+    print(f"Input video resolution is {rt[0]}x{rt[1]}")
+    width = rt[0]
+    height = rt[1]
+
+    data_list = run.convert_srt_file_to_json(i_srt_file)
+    if data_list is None:
+        msg = f"Translated txt file {i_srt_file} seems to have issues, please check its content"
+        return
+
+    if out_txt_file is not None:
+        if out_txt_file == i_srt_file:
+            msg = f"Output delivery txt file name cannot be the same as the translated txt file name!"
+            messagebox.showinfo('Notice', msg)
+            return
+
+        run.convert_json_to_txt(data_list, out_txt_file)
+	
+    if out_ass_file is not None:
+        run.convert_json_to_ass(data_list, out_ass_file, i_video_file,width, height)
+
+    if out_txt_file is not None and out_ass_file is not None:
+        msg = f'Processing completed! Check {out_txt_file} and {out_ass_file}'
+    elif out_txt_file is not None:
+        msg = f'Processing completed! Check {out_txt_file}'
+    else: #out_ass_file is not None:
+        msg = f'Processing completed! Check {out_ass_file}'
+    messagebox.showinfo('Notice', msg)
+
+    return
     i_video_file = args[0][3].get()
     i_srt_file = args[1][3].get()
     out_txt_file = args[2][3].get()
@@ -313,14 +399,14 @@ def on_genout_bt_click(args):
     return
 
 ystart += y_sec_dlt
-label = tk.Label(text="生成交付的txt和ass翻译文件", font=title_font)
+label = tk.Label(text="Generate Delivery txt and ass Subtitle Files", font=title_font)
 label.place(x=xstart, y=ystart)  # Specify position
 ystart += y_dlt
 
-genout_boxes_0 = [ ['视频文件名:  ', 800, 'i_video_file', None] ]
-genout_boxes_1 = [ ['翻译好的txt文件名（文件包含编号，时间 --> 时间）:  ', 600, 'i_srt_file', None] ]
-genout_boxes_2 = [ ['输出交付txt文件名:  ', 800, 'out_txt_file', None] ]
-genout_boxes_3 = [ ['输出交付ass文件名:  ', 800, 'out_ass_file', None] ]
+genout_boxes_0 = [ ['Video File Name:  ', 800, 'i_video_file', None] ]
+genout_boxes_1 = [ ['Translated txt File Name (Number, Time --> Time):  ', 600, 'i_srt_file', None] ]
+genout_boxes_2 = [ ['Output Delivery txt File Name:  ', 800, 'out_txt_file', None] ]
+genout_boxes_3 = [ ['Output Delivery ass File Name:  ', 800, 'out_ass_file', None] ]
 
 genout_boxess = [genout_boxes_0, genout_boxes_1, genout_boxes_2, genout_boxes_3]
 genout_args = genout_boxes_0 + genout_boxes_1 + genout_boxes_2 + genout_boxes_3
@@ -328,7 +414,6 @@ genout_args = genout_boxes_0 + genout_boxes_1 + genout_boxes_2 + genout_boxes_3
 for genout_boxes in genout_boxess:
     xstart = x_0
     for i in range(len(genout_boxes)):
-        #txtlen = len(general_boxes[i][0])*char_w
         txtlen = default_font.measure(genout_boxes[i][0])
         label = ttk.Label(text=genout_boxes[i][0], width=txtlen)
         label.place(x=xstart, y=ystart)  # Specify position
@@ -340,10 +425,8 @@ for genout_boxes in genout_boxess:
     ystart += y_dlt
 
 # Button (execute)
-#ystart += y_dlt
 xstart = x_0
-bt_txt = " 生成交付文件 "
-#bt_w = (len(bt_txt)*char_w)
+bt_txt = " Generate Delivery Files "
 bt_w = default_font.measure(bt_txt) + 20
 genout_bt = ttk.Button(text=bt_txt, command=lambda: on_genout_bt_click(genout_args))
 genout_bt.place(x=xstart, y=ystart, width=bt_w)

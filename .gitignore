@@ -2,3 +2,4 @@
 *.mp4
 *.txt
 *.exe
+/__pycache__

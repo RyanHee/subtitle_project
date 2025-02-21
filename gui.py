@@ -338,65 +338,6 @@ def on_genout_bt_click(args):
     messagebox.showinfo('Notice', msg)
 
     return
-    i_video_file = args[0][3].get()
-    i_srt_file = args[1][3].get()
-    out_txt_file = args[2][3].get()
-    out_ass_file = args[3][3].get()
-
-    if i_video_file == None or i_video_file == '':
-        msg = '请输入原始视频文件名'
-        messagebox.showinfo('提示', msg)
-    
-    if i_srt_file == None or i_srt_file == '':
-        msg = '请输入翻译好的txt文件名'
-        messagebox.showinfo('提示', msg)
-
-    if out_txt_file == None or out_txt_file == '':
-        out_txt_file = None
-
-    if out_ass_file == None or out_ass_file == '':
-        out_ass_file = None
-    
-    if out_txt_file == None and out_ass_file is None:
-        msg = '请输入输出交付的txt或ass文件名, 至少1个'
-        messagebox.showinfo('提示', msg)
-
-
-    rt = run.get_mp4_resolution(i_video_file)
-    if rt is None:
-        msg = f"找不到原始视频文件{i_video_file}; 指定正确路径"
-        messagebox.showinfo('提示', msg)
-        return
-
-    print(f"原始视频分辨率是{rt[0]}x{rt[1]}")
-    width = rt[0]
-    height = rt[1]
-
-    data_list = run.convert_srt_file_to_json(i_srt_file)
-    if data_list is None:
-        msg = f"翻译好的txt文件{i_srt_file}似乎有问题, 请确认内容"
-        return
-
-    if out_txt_file is not None:
-        if out_txt_file == i_srt_file:
-            msg = f"输出交付txt文件名不能和翻译好的txt文件名一样!"
-            messagebox.showinfo('提示', msg)
-            return
-
-        run.convert_json_to_txt(data_list, out_txt_file)
-	
-    if out_ass_file is not None:
-        run.convert_json_to_ass(data_list, out_ass_file, i_video_file,width, height)
-
-    if out_txt_file is not None and out_ass_file is not None:
-        msg = f'处理完成! 确认{out_txt_file}和{out_ass_file}是否生成了'
-    elif out_txt_file is not None:
-        msg = f'处理完成! 确认{out_txt_file}是否生成了'
-    else: #out_ass_file is not None:
-        msg = f'处理完成! 确认{out_ass_file}是否生成了'
-    messagebox.showinfo('提示', msg)
-
-    return
 
 ystart += y_sec_dlt
 label = tk.Label(text="Generate Delivery txt and ass Subtitle Files", font=title_font)

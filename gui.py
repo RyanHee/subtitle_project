@@ -66,43 +66,6 @@ def on_cutvideo_bt_click(args):
         messagebox.showinfo('Notice', msg)
 
     return
-    i_video_file = args[0][3].get()
-    t0 = args[2][3].get()
-    t1 = args[3][3].get()
-    o_video_file = args[1][3].get()
-
-    if i_video_file == None or i_video_file == '':
-        msg = '请输入原始视频文件名'
-        messagebox.showinfo('提示', msg)
-        return
-
-    if t0 == None or t0=='':
-        msg = '请输入开始时间, 例如 00:00:00'
-        messagebox.showinfo('提示', msg)
-        return
-
-    if t1 == None or t1=='':
-        msg = '请输入结束时间, 例如 00:00:00'   
-        messagebox.showinfo('提示', msg)
-        return
-    
-    if o_video_file == None or o_video_file=='':
-        msg = '请输入输出文件名'
-        messagebox.showinfo('提示', msg)
-        return
-
-    rt = run.cut_video(i_video_file, t0, t1, o_video_file)
-
-    if rt == 0:
-        msg = f'截取成功, 请检查输出文件 {o_video_file}'
-        messagebox.showinfo('提示', msg)
-    else:
-        msg = '截取失败, 请检查截取开始和节数时间\n'
-        msg += "时间格式是 HH:MM:SS 或者 MM:SS\n"
-        msg += "1:12:34表示1小时12分钟34秒; 12:34表示12分钟34秒"
-        messagebox.showinfo('提示', msg)
-
-    return
 
 cutvideo_boxes_0 = [ ['Input File Name:  ', 800, 'i_video_file', None] ]
 cutvideo_boxes_1 = [ ['Output File Name:  ', 800, 'o_video_file', None] ]
